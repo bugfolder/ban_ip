@@ -1,15 +1,37 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the Ban IP module.
  */
 
-
 /**
  * Implements hook_schema().
  */
 function ban_ip_schema() {
+
+  // Get the version. Possible values are:
+  // FALSE -- ban_ip has never been installed, so we must be in installation.
+  // -1 -- ban_ip was previously installed, then uninstalled. We must be in
+  //   reinstallation.
+  // 0 -- the old version is currently installed. We're in normal usage or
+  //   uninstallation.
+  // 1000+ -- The current version is currently installed. We're in normal usage
+  //   or uninstallation.
+  $version = db_query('
+    SELECT schema_version
+    FROM {system}
+    WHERE name = :name
+    ', array(':name' => 'ban_ip'))
+    ->fetchField();
+
+  // If we are upgrading from D7 and the blocked_ips table already exists, then
+  // during installation we should return an empty array for the schema so that
+  // we don't try to create the table that already exists.
+  if (($version === FALSE || $version == -1) && db_table_exists('blocked_ips')) {
+    $needs_rebuild_schema = &backdrop_static('ban_ip_needs_rebuild_schema', TRUE);
+    return array();
+  }
+
   $schema['blocked_ips'] = array(
     'description' => 'Stores blocked IP addresses.',
     'fields' => array(
@@ -34,4 +56,16 @@ function ban_ip_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function ban_ip_install() {
+  // This hook is called after table creation; if necessary, rebuild the schema
+  // so that it now includes the blocked_ips table.
+  $needs_rebuild_schema = &backdrop_static('ban_ip_needs_rebuild_schema');
+  if (isset($needs_rebuild_schema)) {
+    backdrop_get_complete_schema(TRUE);
+  }
 }
