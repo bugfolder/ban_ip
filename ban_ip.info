@@ -2,3 +2,5 @@ name = Ban IP
 description = Block site vistors by IP address.
 type = module
 backdrop = 1.x
+
+configure = admin/config/people/ip-blocking
