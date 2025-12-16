@@ -148,12 +148,12 @@ function ban_ip_ip_blocking_form($form, $form_state, $default_ip) {
     '#size' => 48,
     '#maxlength' => 40,
     '#default_value' => $default_ip,
-    '#description' => t('Enter a valid IP address.'),
+    '#description' => t('Enter a valid IP address to block.'),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add'),
+    '#value' => t('Block'),
   );
   $form['#submit'][] = 'ban_ip_ip_blocking_form_submit';
   $form['#validate'][] = 'ban_ip_ip_blocking_form_validate';
