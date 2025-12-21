@@ -254,7 +254,9 @@ function ban_ip_denied($ip) {
 function ban_ip_block_denied($ip) {
   // Deny access to blocked IP addresses - t() is not yet available.
   if (ban_ip_denied($ip)) {
-    header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
+    if (!headers_sent()) {
+      header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
+    }
     print 'Sorry, ' . check_plain(ip_address()) . ' has been banned.';
     exit();
   }
